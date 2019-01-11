@@ -1,12 +1,3 @@
-Clone repository:
-git clone <link>.
-
-Possibly install readline sync module:
-Type "npm install readline-sync" into command line. 
-
-Play the game: 
-Type "node game.js" into command line while in correct directory.
-
 # Tic-Tac-Toe
 
 A command line tic-tac-toe game with an unbeatable bot.
