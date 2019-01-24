@@ -1,27 +1,9 @@
+const Dialogue = require('./source/logger.js');
+const Board = require('./source/board.js');
 
 var readline = require('readline-sync');
 
 var cMove;
-
-class Dialogue {
-	youWin (player) {
-		console.log('\x1b[32m%s\x1b[0m', 'Player ' + player + ' \x1b[32mwins!\x1b[0m');
-		playAgain();
-	}
-
-	invalid () {
-		console.log('\x1b[31m%s\x1b[0m', 'Invalid input.');
-	}
-
-	comMove () {
-		console.log('Computer chose position ' + cMove + '.');
-	}
-
-	tieGame () {
-		console.log('\x1b[34m%s\x1b[0m', 'Looks like some sort of tie game');
-		playAgain();
-	}
-}
 
 class Player {
 	constructor (gamePiece, color) {
@@ -40,87 +22,12 @@ class Player {
 	}
 }
 
-class Board {
-	constructor () {
-		// valid board indexes
-		this.pos = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-		// winning triplets
-		this.win = [
-			[0, 1, 2], [3, 4, 5], [6, 7, 8],  // rows
-			[0, 3, 6], [1, 4, 7], [2, 5, 8],  // columns
-			[0, 4, 8], [6, 4, 2]  // diagonals
-		];
-		// for AI players to block "forks"
-		this.corners = [0, 2, 6, 8];  // corners of the board
-		this.spaces = [1, 3, 5, 7];  //  space positions of board
-	}
-
-	checkBoard (player) {
-		//  Look for winning formation
-		for (var i = 0; i < this.win.length; i++) {
-			var c = 0;  // count number of same symbols in a row/column
-			for (var j = 0; j < this.win[i].length; j++) {
-				if (this.pos[this.win[i][j]] === player) {
-					c++;
-				} if (c === 3) {
-					this.printBoard();
-					dialogue.youWin(player);
-						return (1);
-				}
-			}
-		}
-		return (0);
-	}
-
-	isValid (input) {
-		//  check for open position
-		if (input >= 0 && input <= 8 &&
-			this.pos[input] != p1.gamePiece &&
-			this.pos[input] != p2.gamePiece) {
-			return (1);
-		} else {
-			dialogue.invalid();
-			return (0);
-		}
-	}
-
-	checkTie () {
-		// Look for filled board with no win
-		for (var i = 0; i < this.pos.length; i++) {
-			if (this.pos[i] >= 0 &&
-				this.pos[i] <= 8) {
-				return (0);
-			}
-		}
-		this.printBoard();
-		dialogue.tieGame();
-		return (1);
-	}
-
-	reset () {
-		for (var i = 0; i < this.pos.length; i++) {
-			this.pos[i] = i;
-		}
-	}
-
-	printBoard () {
-		clear();
-		console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\n');
-		console.log('     ' + this.pos[0] + ' | ' + this.pos[1] + ' | ' + this.pos[2] + ' ' + '\n'
-			+ '    ===+===+===' + '\n'
-			+ '     ' + this.pos[3] + ' | ' + this.pos[4] + ' | ' + this.pos[5] + ' ' + '\n'
-			+ '    ===+===+===' + '\n'
-			+ '     ' + this.pos[6] + ' | ' + this.pos[7] + ' | ' + this.pos[8] + ' ' + '\n');
-		console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n');
-	}
-}
-
 function playerMove(player) {
 	var position = parseInt(readline.question('Please choose a location: '));
-	if (board.isValid(position) === 1) {
+	if (board.isValid(position, p1, p2, dialogue) === 1) {
 		board.pos[position] = player;
-		if (board.checkBoard(player) === 0 &&
-		board.checkTie() === 0) { //  check for win or tie
+		if (board.checkBoard(player, dialogue, playAgain) === 0 &&
+		board.checkTie(dialogue, playAgain) === 0) { //  check for win or tie
 			level[diff - 1](p2.gamePiece);
 		}
 	} else {
@@ -130,12 +37,12 @@ function playerMove(player) {
 
 var easy = function(player) {
 	cMove = Math.floor(Math.random() * 9); // choose random position
-		if (board.isValid(cMove) === 1) {
+		if (board.isValid(cMove, p1, p2, dialogue) === 1) {
 			board.pos[cMove] = player;
 			board.printBoard();
-			dialogue.comMove();
-			if (board.checkBoard(player) === 0 &&
-			board.checkTie() === 0) {
+			dialogue.comMove(cMove);
+			if (board.checkBoard(player, dialogue, playAgain) === 0 &&
+			board.checkTie(dialogue, playAgain) === 0) {
 				playerMove(p1.gamePiece);
 			}
 		} else {
@@ -147,12 +54,12 @@ var med = function(player) {
 	cMove = board.pos[Math.floor(Math.random() * 9)];
 	takeWin();
 	takeBlock();
-	if (board.isValid(cMove) === 1) {
+	if (board.isValid(cMove, p1, p2, dialogue) === 1) {
 		board.pos[cMove] = player;
 		board.printBoard();
-		dialogue.comMove();
-		if (board.checkBoard(player) === 0 &&
-		board.checkTie() === 0) {
+		dialogue.comMove(cMove);
+		if (board.checkBoard(player, dialogue, playAgain) === 0 &&
+		board.checkTie(dialogue, playAgain) === 0) {
 			playerMove(p1.gamePiece);
 		}
 	} else {
@@ -213,7 +120,9 @@ function blockForks () {
 	}
 	if ((count === 1 || count2 === 1) && board.pos[4] == 4) {
 		cMove = 4;
-	} if (count == 2 && board.pos[4] == p2.gamePiece && count2 === 0) {
+	} if (count == 2 &&
+		board.pos[4] == p2.gamePiece &&
+		count2 === 0) {
 		cMove = board.spaces[Math.floor(Math.random() * 5)];
 	}
 }
@@ -237,11 +146,12 @@ var hard = function(player) {
 	checkCorners();
 	takeBlock();
 	takeWin();
-	if (board.isValid(cMove) === 1) {
+	if (board.isValid(cMove, p1, p2, dialogue) === 1) {
 		board.pos[cMove] = player;
 		board.printBoard();
-		dialogue.comMove();
-		if (board.checkBoard(player) === 0 && board.checkTie() === 0) {
+		dialogue.comMove(cMove);
+		if (board.checkBoard(player, dialogue, playAgain) === 0 &&
+		board.checkTie(dialogue, playAgain) === 0) {
 			playerMove(p1.gamePiece);
 		}
 	} else {
@@ -263,11 +173,12 @@ function comVsCom () {
 	cMove = Math.floor(Math.random() * 9);
 	takeBlock();
 	takeWin();
-	if (board.isValid(cMove) === 1) {
+	if (board.isValid(cMove, p1, p2, dialogue) === 1) {
 		board.pos[cMove] = currentPlayer;
 		board.printBoard();
-		dialogue.comMove();
-		if (board.checkBoard(currentPlayer) === 0 && board.checkTie() === 0) {
+		dialogue.comMove(cMove);
+		if (board.checkBoard(currentPlayer, dialogue, playAgain) === 0 &&
+		board.checkTie(dialogue, playAgain) === 0) {
 			console.log('Thinking..');
 			switchPlayer();
 			setTimeout(function(){comVsCom(currentPlayer)}, 1600);
@@ -275,10 +186,6 @@ function comVsCom () {
 	} else {
 		comVsCom(currentPlayer);
 	}
-}
-
-function clear () {
-  return process.stdout.write('\033c');
 }
 
 let board = new Board();
@@ -290,7 +197,7 @@ var diff;
 var currentPlayer = p1.gamePiece;
 
 function printMenu () {
-	clear();
+	board.clear();
 	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\n');
 	console.log('   1: Man Vs. Man\n'
 		+ '\n'
@@ -301,7 +208,7 @@ function printMenu () {
 }
 
 function printDMenu () {
-	clear();
+	board.clear();
 	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\n');
 	console.log('\x1b[32m%s\x1b[0m', '   1: Easy\n');
 	console.log('\x1b[33m%s\x1b[0m', '   2: Medium\n');
@@ -322,13 +229,14 @@ function chooseGame () {
 
 function turn (player) {
 	var position = readline.question('Player ' + player + ' please choose a location: ')
-	if (board.isValid(position) === 1) {
+	if (board.isValid(position, p1, p2, dialogue) === 1) {
 		board.pos[position] = player;
 		board.printBoard();
 	} else {
 		turn (player);
 	}
-	if (board.checkBoard(player) === 0 && board.checkTie() === 0) {
+	if (board.checkBoard(player, dialogue, playAgain) === 0 &&
+	board.checkTie(dialogue, playAgain) === 0) {
 		if (player == p1.gamePiece) {
 			turn(p2.gamePiece);
 			return;
