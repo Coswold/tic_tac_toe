@@ -31,11 +31,11 @@ class Board {
 		return (0);
 	}
 
-	isValid (input, p1, p2, dialogue) {
+	isValid (input, players, dialogue) {
 		//  check for open position
 		if (input >= 0 && input <= 8 &&
-			this.pos[input] != p1.gamePiece &&
-			this.pos[input] != p2.gamePiece) {
+			this.pos[input] != players.p1 &&
+			this.pos[input] != players.p2) {
 			return (1);
 		} else {
 			dialogue.invalid();
@@ -77,6 +77,26 @@ class Board {
 			+ '     ' + this.pos[6] + ' | ' + this.pos[7] + ' | ' + this.pos[8] + ' ' + '\n');
 		console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n');
 	}
+
+    printMenu () {
+    	this.clear();
+    	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\n');
+    	console.log('   1: Man Vs. Man\n'
+    		+ '\n'
+    		+ '   2: Man Vs. Com\n'
+    		+ '\n'
+    		+ '   3: Com Vs. Com\n');
+    	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n');
+    }
+
+    printDMenu () {
+    	this.clear();
+    	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\n');
+    	console.log('\x1b[32m%s\x1b[0m', '   1: Easy\n');
+    	console.log('\x1b[33m%s\x1b[0m', '   2: Medium\n');
+    	console.log('\x1b[31m%s\x1b[0m', '   3: Hard\n');
+    	console.log('\x1b[36m%s\x1b[0m', '\n/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n');
+    }
 }
 
 module.exports = Board;
