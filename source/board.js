@@ -13,7 +13,7 @@ class Board {
 		this.spaces = [1, 3, 5, 7];  //  space positions of board
 	}
 
-	checkBoard (player, dialogue, playAgain) {
+	checkBoard (player, dialogue) {
 		//  Look for winning formation
 		for (var i = 0; i < this.win.length; i++) {
 			var c = 0;  // count number of same symbols in a row/column
@@ -23,7 +23,6 @@ class Board {
 				} if (c === 3) {
 					this.printBoard();
 					dialogue.youWin(player);
-                    playAgain();
 						return (1);
 				}
 			}
@@ -43,7 +42,7 @@ class Board {
 		}
 	}
 
-	checkTie (dialogue, playAgain) {
+	checkTie (dialogue) {
 		// Look for filled board with no win
 		for (var i = 0; i < this.pos.length; i++) {
 			if (this.pos[i] >= 0 &&
@@ -53,7 +52,6 @@ class Board {
 		}
 		this.printBoard();
 		dialogue.tieGame();
-        playAgain();
 		return (1);
 	}
 
