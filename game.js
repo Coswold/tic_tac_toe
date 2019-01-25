@@ -204,3 +204,5 @@ var hard = function(player) {
 
 game = new Game(easy, med, hard);
 game.gameLoop();
+
+module.exports = Game;
